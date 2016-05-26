@@ -3,14 +3,16 @@ CFLAGS=-g -Wall
 
 .PHONY: clean all
 
-all: simple_request arp_spoof
+all: simple_request arp_spoof arp_mitm
 
 simple_request: simple_request.o arp.o
 
 arp_spoof: arp_spoof.o arp.o
 
+arp_mitm: arp_mitm.o arp.o
+
 %.o: %.c %.h
 	$(CC) -c $< $(CFLAGS)
 
 clean:
-	rm *.o simple_request arp_spoof
+	rm *.o simple_request arp_spoof arp_mitm
