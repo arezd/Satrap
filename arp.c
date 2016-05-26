@@ -89,3 +89,87 @@ int send_arp_request(int sockfd, int ifindex, struct sockaddr_in *ipaddr, unsign
   return 0;
 }
 
+
+
+/* Sends an ARP reply
+
+   sockfd: file descriptor of the socket
+   ifindex: index of the network interface
+   sender_ip: source IP address
+   sender_mac: source MAC address
+   target_ip: IP address to which the answer is destined
+   target_mac: MAC address of the target
+
+   The function returns 0 on success, or exits with EXIT_FAILURE.
+ */
+int send_arp_reply(int sockfd, int ifindex, struct sockaddr_in *sender_ip, unsigned char *sender_mac, struct in_addr target_ip, unsigned char *target_mac)
+{
+
+  /* DEFINITION OF THE DESTINATION */
+  
+  /* The destination of the packet is contained in a struct
+     sockaddr_ll */
+  struct sockaddr_ll addr;
+  addr.sll_family = AF_PACKET; /* always AF_PACKET */
+  addr.sll_protocol = htons(ETH_P_ARP); /* physical-layer protocol */
+  addr.sll_ifindex = ifindex; /* interface number */
+  addr.sll_halen = ETHER_ADDR_LEN; /* length of address */
+  /* physical-layer address: */
+  memcpy(addr.sll_addr, target_mac, ETHER_ADDR_LEN);
+
+#ifdef DEBUG
+  printf("[OK] Destination structure (struct sockaddr_ll) "
+	 "constructed successfully\n");
+#endif
+
+  
+  /* ====================================================================== */
+
+  /* CONSTRUCTION OF THE FRAME */
+
+  /* We can now build the ARP reply frame, using the structures
+     defined in <netinet/if_ether.h> (included by
+     <netinet/ether.h>). */
+  struct ether_arp reply;
+  reply.arp_hrd = htons(ARPHRD_ETHER); /* hardware type: Ethernet */
+  reply.arp_pro = htons(ETH_P_IP); /* Protocol type: IP */
+  reply.arp_hln = ETHER_ADDR_LEN; /* Hardware address length */
+  reply.arp_pln = sizeof(in_addr_t); /* Protocol address length */
+  reply.arp_op = htons(ARPOP_REPLY); /* Operation code */
+  /* Target hardware address: 0 since this is one we want */
+  memcpy(&reply.arp_tha, target_mac, sizeof(reply.arp_tha));
+  /* Target protocol address: we put the IP address for which we want
+     the layer-2 address */
+  memcpy(&reply.arp_tpa, &target_ip.s_addr, sizeof(reply.arp_tpa));
+  /* Sender hardware address */
+  memcpy(&reply.arp_sha, sender_mac, sizeof(reply.arp_sha));
+  /* Sender protocol (IP) address */
+  memcpy(&reply.arp_spa, &sender_ip->sin_addr, sizeof(reply.arp_spa));
+
+#ifdef DEBUG
+  printf("[OK] ARP reply structure (struct ether_arp) "
+	 "constructed successfully\n");
+#endif
+
+
+  /* ====================================================================== */
+
+  /* SEND THE FRAME */
+
+  int err = sendto(sockfd, &reply, sizeof(reply), 0,
+		   (struct sockaddr *) &addr, sizeof(addr));
+  if (err == -1) {
+    perror("[FAIL] sendto()");
+    exit(EXIT_FAILURE);
+  }
+#ifdef DEBUG
+  printf("[OK] Frame sent\n");
+#endif
+  
+
+
+  return 0;
+  
+}
+
+
