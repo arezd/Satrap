@@ -36,6 +36,18 @@
 */
 int send_arp_request(int sockfd, int ifindex, struct sockaddr_in *ipaddr, unsigned char *macaddr, struct in_addr target_ip);
 
+
+/* Sends an ARP reply
+
+   sockfd: file descriptor of the socket
+   ifindex: index of the network interface
+   sender_ip: source IP address
+   sender_mac: source MAC address
+   target_ip: IP address to which the answer is destined
+   target_mac: MAC address of the target
+
+   The function returns 0 on success, or exits with EXIT_FAILURE.
+ */
 int send_arp_reply(int sockfd, int ifindex, struct sockaddr_in *sender_ip, unsigned char *sender_mac, struct in_addr target_ip, unsigned char *target_mac);
 
 #endif /* ARP_H_ */
