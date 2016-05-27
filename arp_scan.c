@@ -137,8 +137,32 @@ int main(int argc, char **argv)
 #ifdef DEBUG
   printf("[OK] Local netmask: %s\n", netmask_string);
 #endif
-    
+  
 
+  /* ====================================================================== */
+
+  /* Using the local IP address and netmask, we can loop on every IP
+     address on the subnet, and send to every one an ARP request. */
+
+  /* This counter will loop through every available IP address on the
+     current subnet */
+  unsigned long ip_counter = ntohl(ipaddr->sin_addr.s_addr) & ntohl(netmask->sin_addr.s_addr);
+  /* The maximum address on the subnet */
+  unsigned long ip_max = ip_counter + (~ntohl(netmask->sin_addr.s_addr));
+
+  while (ip_counter < ip_max) {
+    char ip_string[16];
+    struct in_addr target_ip;
+    target_ip.s_addr = htonl(ip_counter);
+    if (!inet_ntop(AF_INET, &target_ip.s_addr, ip_string, sizeof(ip_string))) {
+      perror("[FAIL] inet_ntop()");
+      exit(EXIT_FAILURE);
+    }
+    printf("[%s]\n", ip_string);
+    send_arp_request(sockfd, ifindex, ipaddr, macaddr, target_ip);
+    
+    ++ip_counter;
+  }
   
 }
 
