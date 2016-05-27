@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-g -Wall
+CFLAGS=-g -Wall -DDEBUG
 
 .PHONY: clean all
 
@@ -17,4 +17,4 @@ arp_scan: arp_scan.o arp.o
 	$(CC) -c $< $(CFLAGS)
 
 clean:
-	rm *.o simple_request arp_spoof arp_mitm
+	rm *.o simple_request arp_spoof arp_mitm arp_scan

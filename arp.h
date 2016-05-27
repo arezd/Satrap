@@ -18,7 +18,6 @@
 #include <netinet/ether.h>
 
 
-#define DEBUG
 
 
 
