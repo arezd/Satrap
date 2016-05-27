@@ -126,7 +126,15 @@ int main(int argc, char **argv)
   send_arp_request(sockfd, ifindex, ipaddr, macaddr, target_ip);
   
 
-    
+
+  /* ====================================================================== */
+
+  /* We listens to the answer */
+  
+  struct ether_arp *result = malloc(sizeof(struct ether_arp));
+  listen_arp_frame(sockfd, result);
+
+  
   exit(EXIT_SUCCESS);
 }
 
