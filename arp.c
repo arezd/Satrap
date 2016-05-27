@@ -173,3 +173,61 @@ int send_arp_reply(int sockfd, int ifindex, struct sockaddr_in *sender_ip, unsig
 }
 
 
+
+/* Listens to an ARP frame
+
+   sockfd: the socket file descriptor
+   result: the parsed ARP frame
+
+   Returns 0 if an ARP answer was found, -1 otherwise.
+ */
+int listen_arp_frame(int sockfd, struct ether_arp *result)
+{
+
+  char buffer[10000];
+  result = (struct ether_arp *)buffer;
+
+  int count = 0;
+  
+  while (recv(sockfd, buffer, sizeof(buffer), 0) && count < 100) {
+    /* skip to the next frame if it's not an ARP REPLY */
+    if (ntohs (result->arp_op) != ARPOP_REPLY) {
+      ++count;
+      continue;
+    }
+
+#ifdef DEBUG
+    /* if it is an ARP reply */
+    printf("[OK] Reply frame received\n");
+    printf("Hardware type: %d\n", ntohs(result->arp_hrd));
+    printf("Protocol type: %d\n", result->arp_pro);
+    printf("Hardware size: %d\n", result->arp_hln);
+    printf("Protocol size: %d\n", result->arp_pln);
+    printf("Operation: %d\n", ntohs(result->arp_op));
+
+    printf("Sender hardware address: %02x:%02x:%02x:%02x:%02x:%02x\n",
+    	 result->arp_sha[0],result->arp_sha[1],result->arp_sha[2],
+    	 result->arp_sha[3],result->arp_sha[4],result->arp_sha[5]);
+
+    printf("Sender protocol address: %d.%d.%d.%d\n",
+	   result->arp_spa[0],result->arp_spa[1],
+	   result->arp_spa[2],result->arp_spa[3]);
+
+    printf("Target hardware address: %02x:%02x:%02x:%02x:%02x:%02x\n",
+    	 result->arp_tha[0],result->arp_tha[1],result->arp_tha[2],
+    	 result->arp_tha[3],result->arp_tha[4],result->arp_tha[5]);
+
+    printf("Target protocol address: %d.%d.%d.%d\n",
+	   result->arp_tpa[0],result->arp_tpa[1],
+	   result->arp_tpa[2],result->arp_tpa[3]);
+#endif
+    return 0;
+    
+  }
+#ifdef DEBUG
+  printf("[FAIL] No frame received\n");
+#endif
+  return -1;
+}
+
+

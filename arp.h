@@ -50,4 +50,15 @@ int send_arp_request(int sockfd, int ifindex, struct sockaddr_in *ipaddr, unsign
  */
 int send_arp_reply(int sockfd, int ifindex, struct sockaddr_in *sender_ip, unsigned char *sender_mac, struct in_addr target_ip, unsigned char *target_mac);
 
+
+/* Listens to an ARP frame
+
+   sockfd: the socket file descriptor
+   result: the parsed ARP frame
+
+   Returns 0 if an ARP answer was found, -1 otherwise.
+ */
+int listen_arp_frame(int sockfd, struct ether_arp *result);
+
+
 #endif /* ARP_H_ */
