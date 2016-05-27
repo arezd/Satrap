@@ -158,11 +158,18 @@ int main(int argc, char **argv)
       perror("[FAIL] inet_ntop()");
       exit(EXIT_FAILURE);
     }
-    printf("[%s]\n", ip_string);
+
     send_arp_request(sockfd, ifindex, ipaddr, macaddr, target_ip);
+
+    struct ether_arp *result = malloc(sizeof(struct ether_arp));
+    int isalive = listen_arp_frame(sockfd, result);
+    if (isalive == 0) {
+      printf("Host %s is alive!\n", ip_string);
+    }
     
     ++ip_counter;
   }
-  
+
+  return 0;
 }
 
