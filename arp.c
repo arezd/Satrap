@@ -183,13 +183,9 @@ int send_arp_reply(int sockfd, int ifindex, struct sockaddr_in *sender_ip, unsig
  */
 int listen_arp_frame(int sockfd, struct ether_arp *result)
 {
-
-  char buffer[10000];
-  result = (struct ether_arp *)buffer;
-
   int count = 0;
   
-  while (recv(sockfd, buffer, sizeof(buffer), 0) && count < 10) {
+  while (recv(sockfd, result, sizeof(struct ether_arp), 0) && count < 20) {
     /* skip to the next frame if it's not an ARP REPLY */
     if (ntohs (result->arp_op) != ARPOP_REPLY) {
       ++count;
