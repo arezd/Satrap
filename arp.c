@@ -189,7 +189,7 @@ int listen_arp_frame(int sockfd, struct ether_arp *result)
 
   int count = 0;
   
-  while (recv(sockfd, buffer, sizeof(buffer), 0) && count < 100) {
+  while (recv(sockfd, buffer, sizeof(buffer), 0) && count < 10) {
     /* skip to the next frame if it's not an ARP REPLY */
     if (ntohs (result->arp_op) != ARPOP_REPLY) {
       ++count;
