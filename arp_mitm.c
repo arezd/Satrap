@@ -87,6 +87,29 @@ int main(int argc, char **argv)
   printf("[OK] Index number of the Ethernet interface %s: %d\n", if_name, ifindex);
 #endif
 
+  /* We get our IP address using ioctl() and SIOCGIFADDR */
+  struct ifreq ifraddr;
+  if (if_name_len < sizeof(ifraddr.ifr_name)) {
+    memcpy(ifraddr.ifr_name, if_name, if_name_len);
+    ifraddr.ifr_name[if_name_len] = 0;
+  }
+  else {
+    printf("[FAIL] Error: interface name is too long\n");
+  }
+  if (ioctl(sockfd, SIOCGIFADDR, &ifraddr) == -1) {
+    perror("[FAIL] ioctl()");
+    exit(EXIT_FAILURE);
+  }
+  struct sockaddr_in *ipaddr = (struct sockaddr_in *) &ifraddr.ifr_addr;
+  char local_ip_string[16];
+  if (!inet_ntop(AF_INET, &ipaddr->sin_addr, local_ip_string, sizeof(local_ip_string))) {
+    perror("[FAIL] inet_ntop()");
+    exit(EXIT_FAILURE);
+  }
+#ifdef DEBUG
+  printf("[OK] Local IP address: %s\n", local_ip_string);
+#endif
+
   /* We get the MAC address using ioctl() (again) with SIOCGIFHWADDR */
   struct ifreq ifrhwaddr;
   if (if_name_len < sizeof(ifrhwaddr.ifr_name)) {
@@ -121,7 +144,7 @@ int main(int argc, char **argv)
 
   /* ====================================================================== */
 
-  send_arp_request(sockfd, ifindex, ipaddr2, macaddr, target1_ip);
+  send_arp_request(sockfd, ifindex, ipaddr, macaddr, target1_ip);
 
   struct ether_arp reply1;
   listen_arp_frame(sockfd, &reply1);
@@ -130,7 +153,7 @@ int main(int argc, char **argv)
     	 macaddr1[0],macaddr1[1],macaddr1[2],
     	 macaddr1[3],macaddr1[4],macaddr1[5]);
 
-  send_arp_request(sockfd, ifindex, ipaddr1, macaddr, target2_ip);
+  send_arp_request(sockfd, ifindex, ipaddr, macaddr, target2_ip);
   struct ether_arp reply2;
   listen_arp_frame(sockfd, &reply2);
   unsigned char *macaddr2 = reply2.arp_sha;
