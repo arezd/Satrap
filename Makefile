@@ -1,6 +1,5 @@
 CC=clang
 CFLAGS=-g -Wall
-LDFLAGS=-lpthread
 
 .PHONY: clean all
 
