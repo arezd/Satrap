@@ -1,4 +1,4 @@
-/* arp-spoof/arp_mitm.c */
+/* Satrap/arp_mitm.c */
 
 #include "arp.h"
 

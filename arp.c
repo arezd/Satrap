@@ -1,4 +1,4 @@
-/* arp/arp.c */
+/* Satrap/arp.c */
 
 #include "arp.h"
 

@@ -1,4 +1,4 @@
-/* arp/arp.h */
+/* Satrap/arp.h */
 
 #ifndef ARP_H_
 #define ARP_H_

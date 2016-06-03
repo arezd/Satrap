@@ -1,4 +1,4 @@
-/* arp-spoof/arp_scan.c */
+/* Satrap/arp_scan.c */
 
 #include "arp.h"
 
