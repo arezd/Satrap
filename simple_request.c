@@ -37,7 +37,7 @@ int main(int argc, char **argv)
      (to build it ourselves, we could have used SOCK_RAW)
      ETH_P_ALL: We want to listen to every EtherType (here, we could 
      also have chosen ETH_P_ARP) */
-  int sockfd = socket(AF_PACKET, SOCK_DGRAM, htons(ETH_P_ALL));
+  int sockfd = socket(AF_PACKET, SOCK_DGRAM, htons(ETH_P_ARP));
   if (sockfd < 0) {
     perror("[FAIL] socket()");
     exit(EXIT_FAILURE);
