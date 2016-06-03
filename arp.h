@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <pthread.h>
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
