@@ -227,3 +227,41 @@ int listen_arp_frame(int sockfd, struct ether_arp *result)
 }
 
 
+
+/* Redirects all ethernet traffic from one address to another.
+
+   args: struct args, which contains the hardware and protocol
+   addresses of the targets.
+
+   Never returns (killed when the main thread terminates).
+ */
+void *redirect_traffic(void *args)
+{
+  struct args *addresses = (struct args *) args;
+
+  int sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+  if (sockfd < 0) {
+    perror("[FAIL] socket()");
+    exit(EXIT_FAILURE);
+  }
+
+  char buffer[1024];
+  struct ether_header *eh = (struct ether_header *) buffer;
+
+  while (1) {
+    int len = recv(sockfd, buffer, sizeof(buffer), 0);
+    if (len <= 0) {
+      continue;
+    }
+    
+    if (eh->ether_dhost == addresses->macaddr1) {
+      sendto(sockfd, buffer, sizeof(buffer), 0, (struct sockaddr *)&addresses->ip_addr1, sizeof(struct sockaddr));
+    }
+    else if (eh->ether_dhost == addresses->macaddr2) {
+      sendto(sockfd, buffer, sizeof(buffer), 0, (struct sockaddr *)&addresses->ip_addr2, sizeof(struct sockaddr));
+    }
+  }
+  
+  return NULL;
+}
+

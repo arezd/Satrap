@@ -60,4 +60,21 @@ int send_arp_reply(int sockfd, int ifindex, struct sockaddr_in *sender_ip, unsig
 int listen_arp_frame(int sockfd, struct ether_arp *result);
 
 
+struct args {
+  unsigned char macaddr1[6];
+  unsigned char macaddr2[6];
+  struct sockaddr_in ip_addr1;
+  struct sockaddr_in ip_addr2;
+};
+
+/* Redirects all ethernet traffic from one address to another.
+
+   args: struct args, which contains the hardware and protocol
+   addresses of the targets.
+
+   Never returns (killed when the main thread terminates).
+ */
+void *redirect_traffic(void *args);
+
+
 #endif /* ARP_H_ */
