@@ -133,6 +133,11 @@ int main(int argc, char **argv)
   
   struct ether_arp *result = malloc(sizeof(struct ether_arp));
   listen_arp_frame(sockfd, result);
+  unsigned char *macaddr1 = result->arp_sha;
+  printf("Target hardware address: %02x:%02x:%02x:%02x:%02x:%02x\n",
+    	 macaddr1[0],macaddr1[1],macaddr1[2],
+    	 macaddr1[3],macaddr1[4],macaddr1[5]);
+
 
   
   exit(EXIT_SUCCESS);
