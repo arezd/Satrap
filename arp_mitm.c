@@ -161,20 +161,6 @@ int main(int argc, char **argv)
     	 macaddr2[0],macaddr2[1],macaddr2[2],
     	 macaddr2[3],macaddr2[4],macaddr2[5]);
 
-
-  struct args args;
-  memcpy(args.macaddr1, macaddr1, sizeof(*macaddr1));
-  memcpy(args.macaddr2, macaddr2, sizeof(*macaddr2));
-  memcpy(&args.ip_addr1, ipaddr1, sizeof(*ipaddr1));
-  memcpy(&args.ip_addr2, ipaddr2, sizeof(*ipaddr2));
-  
-  pthread_t thread;
-  if (pthread_create(&thread, NULL, redirect_traffic, (void *)&args)) {
-    perror("[FAIL] pthread_create()");
-    exit(EXIT_FAILURE);
-  }
-  
-
   /* We send ARP requests and replies to both targets, impersonating
      the other. We use both requests and replies because some devices
      (linux > 2.4.x for example) don't update their ARP cache on
