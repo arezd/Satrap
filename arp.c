@@ -184,11 +184,14 @@ int send_arp_reply(int sockfd, int ifindex, struct sockaddr_in *sender_ip, unsig
 int listen_arp_frame(int sockfd, struct ether_arp *result)
 {
   int count = 0;
+  int len = recv(sockfd, result, sizeof(struct ether_arp), 0);
   
-  while (recv(sockfd, result, sizeof(struct ether_arp), 0) && count < 20) {
+  while (len > 0 && count < 20) {
     /* skip to the next frame if it's not an ARP REPLY */
     if (ntohs (result->arp_op) != ARPOP_REPLY) {
       ++count;
+      //printf("Operation: %d\n", ntohs(result->arp_op));
+      recv(sockfd, result, sizeof(struct ether_arp), 0);
       continue;
     }
 
@@ -220,9 +223,9 @@ int listen_arp_frame(int sockfd, struct ether_arp *result)
     return 0;
     
   }
-#ifdef DEBUG
+
   printf("[FAIL] No frame received\n");
-#endif
+
   return -1;
 }
 
