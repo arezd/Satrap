@@ -164,7 +164,9 @@ int main(int argc, char **argv)
     struct ether_arp *result = malloc(sizeof(struct ether_arp));
     int isalive = listen_arp_frame(sockfd, result);
     if (isalive == 0) {
-      printf("Host %s is alive!\n", ip_string);
+      printf("Host %d.%d.%d.%d is alive!\n",
+	     result->arp_spa[0],result->arp_spa[1],
+	     result->arp_spa[2],result->arp_spa[3]);
     }
     
     ++ip_counter;
