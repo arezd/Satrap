@@ -75,4 +75,19 @@ int listen_arp_frame(int sockfd, struct ether_arp *result);
 int arp_scan(int sockfd, int ifindex, struct sockaddr_in *ipaddr, unsigned char *macaddr, struct sockaddr_in *netmask);
 
 
+/* ARP man-in-the-middle attack.
+
+   sockfd: socket file descriptor
+   ifindex: index of the interface
+   ipaddr: local IP address
+   macaddr: local hardware address
+   target1_ip: IP address of the first target
+   target2_ip: IP address of the second target
+
+   Never returns, has to be killed by the user.
+ */
+int arp_mitm(int sockfd, int ifindex, struct sockaddr_in *ipaddr, unsigned char *macaddr, struct in_addr *target1_ip, struct in_addr *target2_ip);
+
+
+
 #endif /* ARP_H_ */
