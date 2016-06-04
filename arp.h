@@ -61,5 +61,18 @@ int send_arp_reply(int sockfd, int ifindex, struct sockaddr_in *sender_ip, unsig
 int listen_arp_frame(int sockfd, struct ether_arp *result);
 
 
+/* Scans the subnet by sending ARP requests. If a reply is received,
+   we know that the target is alive.
+
+   sockfd: socket file descriptor
+   ifindex: index of the interface
+   ipaddr: local IP address
+   macaddr: local hardware address
+   netmask: local netmask
+
+   Returns 0 when the scan is complete.
+ */
+int arp_scan(int sockfd, int ifindex, struct sockaddr_in *ipaddr, unsigned char *macaddr, struct sockaddr_in *netmask);
+
 
 #endif /* ARP_H_ */

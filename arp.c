@@ -229,3 +229,56 @@ int listen_arp_frame(int sockfd, struct ether_arp *result)
   return -1;
 }
 
+
+
+/* Scans the subnet by sending ARP requests. If a reply is received,
+   we know that the target is alive.
+
+   sockfd: socket file descriptor
+   ifindex: index of the interface
+   ipaddr: local IP address
+   macaddr: local hardware address
+   netmask: local netmask
+
+   Returns 0 when the scan is complete.
+ */
+int arp_scan(int sockfd, int ifindex, struct sockaddr_in *ipaddr, unsigned char *macaddr, struct sockaddr_in *netmask)
+{
+
+  /* Using the local IP address and netmask, we can loop on every IP
+     address on the subnet, and send to every one an ARP request. */
+
+  /* This counter will loop through every available IP address on the
+     current subnet */
+  unsigned long ip_counter = ntohl(ipaddr->sin_addr.s_addr) & ntohl(netmask->sin_addr.s_addr);
+  /* The maximum address on the subnet */
+  unsigned long ip_max = ip_counter + (~ntohl(netmask->sin_addr.s_addr));
+
+  while (ip_counter < ip_max) {
+    char ip_string[16];
+    struct in_addr target_ip;
+    target_ip.s_addr = htonl(ip_counter);
+    if (!inet_ntop(AF_INET, &target_ip.s_addr, ip_string, sizeof(ip_string))) {
+      perror("[FAIL] inet_ntop()");
+      exit(EXIT_FAILURE);
+    }
+
+    send_arp_request(sockfd, ifindex, ipaddr, macaddr, target_ip);
+
+    struct ether_arp *result = malloc(sizeof(struct ether_arp));
+    int isalive = listen_arp_frame(sockfd, result);
+    if (isalive == 0) {
+      printf("Host %d.%d.%d.%d is alive!\n",
+	     result->arp_spa[0],result->arp_spa[1],
+	     result->arp_spa[2],result->arp_spa[3]);
+    }
+    
+    ++ip_counter;
+  }
+
+  
+  return 0;
+}
+
+
+
