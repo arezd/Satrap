@@ -224,8 +224,10 @@ int listen_arp_frame(int sockfd, struct ether_arp *result)
     
   }
 
+#ifdef DEBUG
   printf("[FAIL] No frame received\n");
-
+#endif
+  
   return -1;
 }
 
@@ -318,7 +320,11 @@ int arp_mitm(int sockfd, int ifindex, struct sockaddr_in *ipaddr, unsigned char 
      hardware addresses.  */
   send_arp_request(sockfd, ifindex, ipaddr, macaddr, *target1_ip);
   struct ether_arp reply1;
-  listen_arp_frame(sockfd, &reply1);
+  int n = listen_arp_frame(sockfd, &reply1);
+  if (n != 0) {
+    printf("[FAIL] No frame received\n");
+    exit(EXIT_FAILURE);
+  }
   unsigned char *macaddr1 = reply1.arp_sha;
   printf("Target 1 hardware address: %02x:%02x:%02x:%02x:%02x:%02x\n",
     	 macaddr1[0],macaddr1[1],macaddr1[2],
@@ -326,7 +332,11 @@ int arp_mitm(int sockfd, int ifindex, struct sockaddr_in *ipaddr, unsigned char 
 
   send_arp_request(sockfd, ifindex, ipaddr, macaddr, *target2_ip);
   struct ether_arp reply2;
-  listen_arp_frame(sockfd, &reply2);
+  n = listen_arp_frame(sockfd, &reply2);
+  if (n != 0) {
+    printf("[FAIL] No frame received\n");
+    exit(EXIT_FAILURE);
+  }
   unsigned char *macaddr2 = reply2.arp_sha;
   printf("Target 2 hardware address: %02x:%02x:%02x:%02x:%02x:%02x\n",
     	 macaddr2[0],macaddr2[1],macaddr2[2],
