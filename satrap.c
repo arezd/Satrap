@@ -32,9 +32,9 @@ int main(int argc, char **argv)
     perror("[FAIL] socket()");
     exit(EXIT_FAILURE);
   }
-#ifdef DEBUG
+
   printf("[OK] Raw Ethernet socket started successfully\n");
-#endif
+
 
 
 
@@ -89,9 +89,8 @@ int main(int argc, char **argv)
     perror("[FAIL] inet_ntop()");
     exit(EXIT_FAILURE);
   }
-#ifdef DEBUG
   printf("[OK] Local IP address: %s\n", local_ip_string);
-#endif
+
   
   /* We get the MAC address using ioctl() (again) with SIOCGIFHWADDR */
   struct ifreq ifrhwaddr;
@@ -107,10 +106,9 @@ int main(int argc, char **argv)
     exit(EXIT_FAILURE);
   }
   unsigned char *macaddr = (unsigned char *) &ifrhwaddr.ifr_hwaddr.sa_data;
-#ifdef DEBUG
   printf("[OK] Local MAC address: %02x:%02x:%02x:%02x:%02x:%02x\n",
 	 macaddr[0], macaddr[1], macaddr[2], macaddr[3], macaddr[4], macaddr[5]);
-#endif
+
 
   /* We get the subnet mask using ioctl() with SIOCGIFNETMASK */
   struct ifreq ifrnetmask;
@@ -131,9 +129,8 @@ int main(int argc, char **argv)
     perror("[FAIL] inet_ntop()");
     exit(EXIT_FAILURE);
   }
-#ifdef DEBUG
   printf("[OK] Local netmask: %s\n", netmask_string);
-#endif
+
 
 
 
@@ -151,7 +148,7 @@ int main(int argc, char **argv)
   char target1_ip_string[16];
   printf("Target 1 IP: ");
   scanf("%15s", target1_ip_string);
-  printf("%s\n", target1_ip_string);
+  /*printf("%s\n", target1_ip_string);*/
   struct in_addr target1_ip;
   if (!inet_pton(AF_INET, target1_ip_string, &target1_ip)) {
     perror("[FAIL] inet_pton() (badly formatted IP address)");
@@ -161,7 +158,7 @@ int main(int argc, char **argv)
   char target2_ip_string[16];
   printf("Target 2 IP: ");
   scanf("%15s", target2_ip_string);
-  printf("%s\n", target2_ip_string);
+  /*printf("%s\n", target2_ip_string);*/
   struct in_addr target2_ip;
   if (!inet_pton(AF_INET, target2_ip_string, &target2_ip)) {
     perror("[FAIL] inet_pton() (badly formatted IP address)");
