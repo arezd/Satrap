@@ -256,6 +256,8 @@ int arp_scan(int sockfd, int ifindex, struct sockaddr_in *ipaddr, unsigned char 
   /* The maximum address on the subnet */
   unsigned long ip_max = ip_counter | (~ntohl(netmask->sin_addr.s_addr));
 
+  struct ether_arp result;
+
   while (ip_counter < ip_max) {
     char ip_string[16];
     struct in_addr target_ip;
@@ -267,12 +269,11 @@ int arp_scan(int sockfd, int ifindex, struct sockaddr_in *ipaddr, unsigned char 
 
     send_arp_request(sockfd, ifindex, ipaddr, macaddr, target_ip);
 
-    struct ether_arp *result = malloc(sizeof(struct ether_arp));
-    int isalive = listen_arp_frame(sockfd, result);
+    int isalive = listen_arp_frame(sockfd, &result);
     if (isalive == 0) {
       printf("Host %d.%d.%d.%d is alive!\n",
-	     result->arp_spa[0],result->arp_spa[1],
-	     result->arp_spa[2],result->arp_spa[3]);
+	     result.arp_spa[0],result.arp_spa[1],
+	     result.arp_spa[2],result.arp_spa[3]);
     }
     
     ++ip_counter;
