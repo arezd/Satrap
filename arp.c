@@ -28,12 +28,17 @@ int send_arp_request(int sockfd, int ifindex, struct sockaddr_in *ipaddr, unsign
   const unsigned char ether_broadcast_addr[]= {0xff,0xff,0xff,0xff,0xff,0xff};
 
   struct sockaddr_ll addr;
+  memset(&addr, 0, sizeof(addr));
   addr.sll_family = AF_PACKET; /* always AF_PACKET */
   addr.sll_protocol = htons(ETH_P_ARP); /* physical-layer protocol */
   addr.sll_ifindex = ifindex; /* interface number */
   addr.sll_halen = ETHER_ADDR_LEN; /* length of address */
   /* physical-layer address: */
   memcpy(addr.sll_addr, ether_broadcast_addr, ETHER_ADDR_LEN);
+  /* The following fields should be 0 when you send packets, see
+     packet(7) */
+  addr.sll_hatype = 0;
+  addr.sll_pkttype = 0;
 
 #ifdef DEBUG
   printf("[OK] Destination structure (struct sockaddr_ll) "
