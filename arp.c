@@ -254,7 +254,7 @@ int arp_scan(int sockfd, int ifindex, struct sockaddr_in *ipaddr, unsigned char 
      current subnet */
   unsigned long ip_counter = ntohl(ipaddr->sin_addr.s_addr) & ntohl(netmask->sin_addr.s_addr);
   /* The maximum address on the subnet */
-  unsigned long ip_max = ip_counter + (~ntohl(netmask->sin_addr.s_addr));
+  unsigned long ip_max = ip_counter | (~ntohl(netmask->sin_addr.s_addr));
 
   while (ip_counter < ip_max) {
     char ip_string[16];
